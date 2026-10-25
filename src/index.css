@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+/* Design tokens. Reuse these (via the Tailwind utilities below or var(--...))
+   so anything embedded later can match the app. */
+:root {
+  --accent: #4f46e5;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --radius: 0.5rem;
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@theme inline {
+  --color-accent: var(--accent);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --radius-token: var(--radius);
+  --font-sans: var(--font);
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font);
+}
