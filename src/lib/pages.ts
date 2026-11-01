@@ -4,6 +4,7 @@ export type Page = {
   slug: string
   headline: string | null
   subheadline: string | null
+  audience: string | null
   button_label: string | null
   button_url: string | null
   accent: string | null

@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import type { Page } from '../lib/pages'
 import { Button, Card, Input } from '../components/ui'
 import { PagePreview } from '../components/PagePreview'
+import { HeadlineRewriter } from '../components/HeadlineRewriter'
 
 export default function Editor() {
   const { id } = useParams()
@@ -41,6 +42,7 @@ export default function Editor() {
       .update({
         headline: page.headline,
         subheadline: page.subheadline,
+        audience: page.audience,
         button_label: page.button_label,
         button_url: page.button_url,
         accent: page.accent,
@@ -80,6 +82,12 @@ export default function Editor() {
               onChange={(e) => set({ subheadline: e.target.value })}
             />
             <Input
+              label="Audience"
+              placeholder="Who is this page for?"
+              value={page.audience ?? ''}
+              onChange={(e) => set({ audience: e.target.value })}
+            />
+            <Input
               label="Button label"
               value={page.button_label ?? ''}
               onChange={(e) => set({ button_label: e.target.value })}
@@ -100,12 +108,14 @@ export default function Editor() {
             </label>
           </Card>
 
-          {/* TOOLS: a third-party tool will be added here later. */}
+          {/* TOOLS: CZ's Headline rewriter via Ordana, see ORDANA_INTEGRATION.md. */}
           <section id="tools" data-slot="tools">
-            <Card className="border-dashed">
-              <h2 className="mb-1 font-bold">Tools</h2>
-              <p className="text-sm text-muted">Tools will appear here.</p>
-            </Card>
+            <HeadlineRewriter
+              pageId={page.id}
+              headline={page.headline ?? ''}
+              audience={page.audience ?? ''}
+              onUseHeadline={(headline) => set({ headline })}
+            />
           </section>
         </div>
 
