@@ -4,7 +4,6 @@ import { supabase } from '../lib/supabase'
 import type { Page } from '../lib/pages'
 import { Button, Card, Input } from '../components/ui'
 import { PagePreview } from '../components/PagePreview'
-import { HeadlineRewriter } from '../components/HeadlineRewriter'
 
 export default function Editor() {
   const { id } = useParams()
@@ -101,12 +100,12 @@ export default function Editor() {
             </label>
           </Card>
 
-          {/* TOOLS: CZ's Headline rewriter via Ordana, see ORDANA_INTEGRATION.md. */}
+          {/* TOOLS: a third-party tool will be added here later. */}
           <section id="tools" data-slot="tools">
-            {/* Same frame as Card, minus padding: the widget brings its own. */}
-            <div className="overflow-hidden rounded-token border border-border bg-surface">
-              <HeadlineRewriter />
-            </div>
+            <Card className="border-dashed">
+              <h2 className="mb-1 font-bold">Tools</h2>
+              <p className="text-sm text-muted">Tools will appear here.</p>
+            </Card>
           </section>
         </div>
 

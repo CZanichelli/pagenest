@@ -2,8 +2,6 @@
 
 Deliberately tiny landing-page builder, used as a host app for testing a third-party widget. Keep it simple.
 
-This product embeds CZ's widget via Ordana; see ORDANA_INTEGRATION.md before changing it.
-
 ## Stack
 Vite + React + TypeScript + Tailwind v4 + React Router + @supabase/supabase-js. Deployed on Vercel (`vercel.json` SPA rewrite).
 
@@ -14,7 +12,7 @@ Vite + React + TypeScript + Tailwind v4 + React Router + @supabase/supabase-js. 
 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (publishable key) in `.env.local` (gitignored); template in `.env.example`.
 
 ## Routes
-`/` marketing, `/login`, `/signup`, `/dashboard`, `/editor/:id` (form, live preview, Save/Publish, "Tools" section `#tools` with CZ's Headline rewriter embed), `/p/:slug` (public), `/settings`. Dashboard, editor and settings require auth.
+`/` marketing, `/login`, `/signup`, `/dashboard`, `/editor/:id` (form, live preview, Save/Publish, empty "Tools" section `#tools`), `/p/:slug` (public), `/settings`. Dashboard, editor and settings require auth.
 
 ## Data
 `supabase/schema.sql`: table `pages` with RLS (owners full CRUD; anon can select where `published = true`). Slug = slugified headline + random suffix, generated in `src/lib/pages.ts`.
