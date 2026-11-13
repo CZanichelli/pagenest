@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "ordana:billing": "node --env-file=.env.local --experimental-strip-types --no-warnings scripts/ordana-billing-test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

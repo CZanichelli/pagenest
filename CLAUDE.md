@@ -12,7 +12,7 @@ Vite + React + TypeScript + Tailwind v4 + React Router + @supabase/supabase-js. 
 
 ## Env
 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (publishable key) in `.env.local` (gitignored); template in `.env.example`.
-Server-only: `ORDANA_SERVER_KEY_ID`, `ORDANA_SERVER_SECRET` (used by `api/ordana/widget-token.ts`, a Vercel function; never expose to the browser).
+Server-only: `ORDANA_SERVER_KEY_ID`, `ORDANA_SERVER_SECRET` (used by the Vercel functions in `api/ordana/` and `npm run ordana:billing`; never expose to the browser).
 
 ## Routes
 `/` marketing, `/login`, `/signup`, `/dashboard`, `/editor/:id` (form incl. Audience, live preview, Save/Publish, "Tools" section `#tools` with CZ's Headline rewriter), `/p/:slug` (public), `/settings`. Dashboard, editor and settings require auth.

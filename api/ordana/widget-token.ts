@@ -8,11 +8,18 @@ const WIDGET_KEY = 'wak_b26ff3430f044e84a7d27510a5b6eaae'
 
 const b64url = (s: string | Buffer) => Buffer.from(s).toString('base64url')
 
-export function signWidgetToken(sub: string, name: string | undefined, kid: string, secret: string) {
+export function signWidgetToken(
+  sub: string,
+  name: string | undefined,
+  email: string | undefined,
+  kid: string,
+  secret: string,
+) {
   const now = Math.floor(Date.now() / 1000)
   const header = b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT', kid }))
   const claims: Record<string, string | number> = { aud: WIDGET_KEY, sub, iat: now, exp: now + 120, jti: randomUUID() }
   if (name) claims.name = name
+  if (email) claims.email = email
   const body = `${header}.${b64url(JSON.stringify(claims))}`
   return `${body}.${createHmac('sha256', secret).update(body).digest('base64url')}`
 }
@@ -36,11 +43,12 @@ export async function POST(request: Request) {
     headers: { apikey: VITE_SUPABASE_ANON_KEY, Authorization: auth },
   })
   if (!res.ok) return json(401, { error: 'not signed in' })
-  const user = (await res.json()) as { id?: string; user_metadata?: { display_name?: unknown } }
+  const user = (await res.json()) as { id?: string; email?: string; user_metadata?: { display_name?: unknown } }
   if (!user.id) return json(401, { error: 'not signed in' })
 
-  // Name only (never the email): the display name the user set in Pagenest's Settings, if any.
+  // Share = name and email: the display name from Pagenest's Settings (if set) and the account email.
   const name =
     typeof user.user_metadata?.display_name === 'string' ? user.user_metadata.display_name.trim().slice(0, 80) : ''
-  return json(200, { token: signWidgetToken(user.id, name || undefined, ORDANA_SERVER_KEY_ID, ORDANA_SERVER_SECRET) })
+  const token = signWidgetToken(user.id, name || undefined, user.email || undefined, ORDANA_SERVER_KEY_ID, ORDANA_SERVER_SECRET)
+  return json(200, { token })
 }
