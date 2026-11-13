@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { Button } from './ui'
@@ -48,10 +49,40 @@ function validResult(fields: unknown): HeadlineResult | null {
   }
 }
 
+// Pagenest signs its own users in to the widget: a short-lived token from our server route, or null.
+async function fetchWidgetToken(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession()
+  if (!data.session) return null
+  const r = await fetch('/api/ordana/widget-token', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${data.session.access_token}` },
+  })
+  return r.ok ? ((await r.json()).token ?? null) : null
+}
+
+function postIdentity(frame: HTMLIFrameElement, token: string | null) {
+  frame.contentWindow?.postMessage({ type: 'ordana-widget:identity', v: 1, token }, EMBED_ORIGIN)
+}
+
 export function HeadlineRewriter({ pageId, headline, audience, onUseHeadline }: Props) {
   const { session } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
   const frameRef = useRef<HTMLIFrameElement>(null)
+  const signinAsked = useRef(false)
   const [latest, setLatest] = useState<HeadlineResult | null>(null)
+
+  const loginPath = `/login?next=${encodeURIComponent(location.pathname)}`
+  const login = useRef(loginPath)
+  login.current = loginPath
+
+  // Fresh identity whenever the signed-in user changes (sign-in, sign-out, switch account).
+  const userId = session?.user.id
+  useEffect(() => {
+    const frame = frameRef.current
+    if (!frame || !signinAsked.current) return
+    fetchWidgetToken().then((token) => postIdentity(frame, token))
+  }, [userId])
 
   // Latest values for the message listener, without re-subscribing on every keystroke.
   const ctx = useRef({ userId: session?.user.id, pageId, headline, audience })
@@ -69,14 +100,21 @@ export function HeadlineRewriter({ pageId, headline, audience, onUseHeadline }: 
   }, [pageId])
 
   useEffect(() => {
-    function onMessage(e: MessageEvent) {
+    async function onMessage(e: MessageEvent) {
       const frame = frameRef.current
       if (!frame || e.source !== frame.contentWindow) return
       if (e.data?.type === 'ordana-widget:resize') {
         frame.style.height = `${e.data.height}px`
         return
       }
-      if (e.origin !== EMBED_ORIGIN || e.data?.v !== 1) return
+      if (e.origin !== EMBED_ORIGIN) return
+      if (e.data?.type === 'ordana-widget:signin') {
+        signinAsked.current = true
+        const token = await fetchWidgetToken()
+        if (!token && e.data.reason === 'needed') return navigate(login.current)
+        return postIdentity(frame, token)
+      }
+      if (e.data?.v !== 1) return
       const { userId, pageId, headline, audience } = ctx.current
       if (e.data.type === 'ordana-widget:ready') {
         const fields = userId ? { draft_title: headline.trim(), audience: audience.trim() } : {}

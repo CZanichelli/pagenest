@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { Button, Card, Input } from '../components/ui'
@@ -11,8 +11,11 @@ function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  // Where to return after sign-in (e.g. the editor, when the widget asked for it). Same-site paths only.
+  const nextParam = useSearchParams()[0].get('next') ?? ''
+  const next = /^\/(?!\/)/.test(nextParam) ? nextParam : '/dashboard'
 
-  if (session) return <Navigate to="/dashboard" replace />
+  if (session) return <Navigate to={next} replace />
 
   async function submit(e: FormEvent) {
     e.preventDefault()
@@ -23,7 +26,7 @@ function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
       mode === 'login' ? await supabase.auth.signInWithPassword(creds) : await supabase.auth.signUp(creds)
     setBusy(false)
     if (error) return setError(error.message)
-    if (data.session) navigate('/dashboard')
+    if (data.session) navigate(next)
     else setError('Check your email to confirm your account, then log in.')
   }
 
